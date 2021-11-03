@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Table;
@@ -14,6 +15,7 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\TipoPlanosTable&\Cake\ORM\Association\BelongsTo $TipoPlanos
  * @property \App\Model\Table\TipoEtapasRegistrosTable&\Cake\ORM\Association\BelongsTo $TipoEtapasRegistros
  * @property \App\Model\Table\CarteirasInvestimentosTable&\Cake\ORM\Association\HasMany $CarteirasInvestimentos
+ * @property \App\Model\Table\TipoPerfilInvestidorTable&\Cake\ORM\Association\BelongsTo $TipoPerfilInvestidor
  *
  * @method \App\Model\Entity\Usuario newEmptyEntity()
  * @method \App\Model\Entity\Usuario newEntity(array $data, array $options = [])
@@ -59,6 +61,11 @@ class UsuariosTable extends Table
         ]);
         $this->hasMany('CarteirasInvestimentos', [
             'foreignKey' => 'usuario_id',
+        ]);
+
+        $this->belongsTo('TipoPerfilInvestidor', [
+            'foreignKey' => 'tipo_perfil_investidor_id',
+            'joinType' => 'LEFT',
         ]);
     }
 
@@ -128,6 +135,7 @@ class UsuariosTable extends Table
         $rules->add($rules->isUnique(['cpf']), ['errorField' => 'cpf']);
         $rules->add($rules->existsIn(['tipo_plano_id'], 'TipoPlanos'), ['errorField' => 'tipo_plano_id']);
         $rules->add($rules->existsIn(['tipo_etapas_registro_id'], 'TipoEtapasRegistros'), ['errorField' => 'tipo_etapas_registro_id']);
+        $rules->add($rules->existsIn(['tipo_perfil_investidor_id'], 'TipoPerfilInvestidor'), ['errorField' => 'tipo_perfil_investidor_id']);
 
         return $rules;
     }
