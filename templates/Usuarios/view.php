@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Usuario $usuario
@@ -33,6 +34,10 @@
                 <tr>
                     <th><?= __('Senha') ?></th>
                     <td><?= h($usuario->senha) ?></td>
+                </tr>
+                <tr>
+                    <th><?= __('Perfil do investidor') ?></th>
+                    <td><?= $usuario->has('tipo_perfil_investidor') ? h($usuario->tipo_perfil_investidor->nome) : ' - ' ?></td>
                 </tr>
                 <tr>
                     <th><?= __('Tipo Plano') ?></th>
@@ -70,30 +75,30 @@
             <div class="related">
                 <h4><?= __('Related Carteiras Investimentos') ?></h4>
                 <?php if (!empty($usuario->carteiras_investimentos)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Usuario Id') ?></th>
-                            <th><?= __('Nome') ?></th>
-                            <th><?= __('Descricao') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($usuario->carteiras_investimentos as $carteirasInvestimentos) : ?>
-                        <tr>
-                            <td><?= h($carteirasInvestimentos->id) ?></td>
-                            <td><?= h($carteirasInvestimentos->usuario_id) ?></td>
-                            <td><?= h($carteirasInvestimentos->nome) ?></td>
-                            <td><?= h($carteirasInvestimentos->descricao) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'CarteirasInvestimentos', 'action' => 'view', $carteirasInvestimentos->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'CarteirasInvestimentos', 'action' => 'edit', $carteirasInvestimentos->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'CarteirasInvestimentos', 'action' => 'delete', $carteirasInvestimentos->id], ['confirm' => __('Are you sure you want to delete # {0}?', $carteirasInvestimentos->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
+                    <div class="table-responsive">
+                        <table>
+                            <tr>
+                                <th><?= __('Id') ?></th>
+                                <th><?= __('Usuario Id') ?></th>
+                                <th><?= __('Nome') ?></th>
+                                <th><?= __('Descricao') ?></th>
+                                <th class="actions"><?= __('Actions') ?></th>
+                            </tr>
+                            <?php foreach ($usuario->carteiras_investimentos as $carteirasInvestimentos) : ?>
+                                <tr>
+                                    <td><?= h($carteirasInvestimentos->id) ?></td>
+                                    <td><?= h($carteirasInvestimentos->usuario_id) ?></td>
+                                    <td><?= h($carteirasInvestimentos->nome) ?></td>
+                                    <td><?= h($carteirasInvestimentos->descricao) ?></td>
+                                    <td class="actions">
+                                        <?= $this->Html->link(__('View'), ['controller' => 'CarteirasInvestimentos', 'action' => 'view', $carteirasInvestimentos->id]) ?>
+                                        <?= $this->Html->link(__('Edit'), ['controller' => 'CarteirasInvestimentos', 'action' => 'edit', $carteirasInvestimentos->id]) ?>
+                                        <?= $this->Form->postLink(__('Delete'), ['controller' => 'CarteirasInvestimentos', 'action' => 'delete', $carteirasInvestimentos->id], ['confirm' => __('Are you sure you want to delete # {0}?', $carteirasInvestimentos->id)]) ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Entity;
@@ -24,6 +25,7 @@ use Cake\ORM\Entity;
  * @property \App\Model\Entity\TipoPlano $tipo_plano
  * @property \App\Model\Entity\TipoEtapasRegistro $tipo_etapas_registro
  * @property \App\Model\Entity\CarteirasInvestimento[] $carteiras_investimentos
+ * @property \App\Model\Entity\TipoPerfilInvestidor $tipo_perfil_investidor
  */
 class Usuario extends Entity
 {
@@ -51,5 +53,6 @@ class Usuario extends Entity
         'tipo_plano' => true,
         'tipo_etapas_registro' => true,
         'carteiras_investimentos' => true,
+        'tipo_perfil_investidor' => true,
     ];
 }
