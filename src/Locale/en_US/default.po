@@ -1,0 +1,6 @@
+msgid "Administração"
+msgstr "Administration"
+
+msgid "Entrar"
+msgstr "Logon"
+

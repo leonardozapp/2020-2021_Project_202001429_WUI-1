@@ -1,0 +1,34 @@
+<?php
+/**
+ * @var \App\View\AppView $this
+ * @var \App\Model\Entity\LogsAtividade $logsAtividade
+ */
+?>
+<div class="row">
+    <aside class="column">
+        <div class="side-nav">
+            <h4 class="heading"><?= __('Actions') ?></h4>
+            <?= $this->Html->link(__('List Logs Atividades'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
+        </div>
+    </aside>
+    <div class="column-responsive column-80">
+        <div class="logsAtividades form content">
+            <?= $this->Form->create($logsAtividade) ?>
+            <fieldset>
+                <legend><?= __('Add Logs Atividade') ?></legend>
+                <?php
+                    echo $this->Form->control('action');
+                    echo $this->Form->control('remoteURI');
+                    echo $this->Form->control('localURI');
+                    echo $this->Form->control('result');
+                    echo $this->Form->control('hasErrors');
+                    echo $this->Form->control('message');
+                    echo $this->Form->control('date');
+                    echo $this->Form->control('needToRedo');
+                ?>
+            </fieldset>
+            <?= $this->Form->button(__('Submit')) ?>
+            <?= $this->Form->end() ?>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,514 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2020-08-15 11:42-0300\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:57
+msgid "-> Testing :url"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:86
+msgid "Total Requests made: :requests"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:87
+msgid "Total Time elapsed: :duration (seconds)"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:91
+msgid "Requests/Second: :rps req/sec"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:95
+msgid "Average request time: :average-time seconds"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:99
+msgid "Standard deviation of average request time: :std-dev"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:103
+msgid "Longest/shortest request: :longest sec/:shortest sec"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:161
+msgid "Allows you to obtain some rough benchmarking statisticsabout a fully qualified URL."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:167
+msgid "The URL to request."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:172
+msgid "Number of iterations to perform."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:176
+msgid "Maximum total time for all iterations, in seconds.If a single iteration takes more than the timeout, only one request will be made"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Command/BenchmarkCommand.php:182
+msgid "Example Use: `cake benchmark --n 10 --t 100 http://localhost/testsite`. <info>Note:</info> this benchmark does not include browser render times."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Controller/ComposerController.php:59
+msgid "You have to be connected to the internet"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Controller/MailPreviewController.php:74
+msgid "No emails found in this request"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Controller/MailPreviewController.php:154
+msgid "Email part ''{0}'' not found in email"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Controller/MailPreviewController.php:277
+msgid "Mailer preview {0}::{1} not found"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Controller/ToolbarController.php:52
+msgid "Invalid cache engine name."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/DebugTimer.php:135
+msgid "Core Processing (Derived from $_SERVER[\"REQUEST_TIME\"])"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Model/Table/PanelsTable.php:59
+msgid "Missing request id in {0}."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Panel/PanelRegistry.php:66
+msgid "Unable to find ''{0}'' panel."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Panel/VariablesPanel.php:76
+msgid "Could not retrieve debug info - {0}. Error: {1} in {2}, line {3}"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Panel/VariablesPanel.php:181
+msgid "Unserializable object - {0}. Error: {1} in {2}, line {3}"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/Panel/VariablesPanel.php:191
+msgid "Unserializable Error: {1} in {2}, line {3}"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/View/Helper/SimpleGraphHelper.php:76
+msgid "Starting {0}ms into the request, taking {1}ms"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:6
+msgid "Debug Kit Dashboard"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:8
+msgid "Database"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:10
+msgid "Driver"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:12
+msgid "Requests"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:17
+msgid "Reset database"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/Dashboard/index.php:25
+msgid "Mail Preview"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/email.php:24
+msgid "You are trying to preview an email that does not have any content."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:29
+msgid "How to use this feature?"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:30
+msgid "Testing emails can be very time consuming"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:31
+msgid "Specially when you need to click a bunch of times on an interface to trigger them."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:32
+msgid "Wouldn't it be better to just change the templates and refresh the browser to see the result?"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:33
+msgid "Just the way you work on the web interface!"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:35
+msgid "Example"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:36
+msgid "{0} integrates with CakePHP’s {1} class. Here's an example of such a mailer:"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:50
+msgid "Returning the chain is a good idea"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:53
+msgid "By default template with same name as method name is used."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:61
+msgid "Now you create a {0} class where you can pass some dummy values."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:87
+msgid "Note that the function MUST return the UserMailer object at the end."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:88
+msgid "Since {0} have a fluent interface, you just need to return the result of the chain of calls."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/MailPreview/index.php:89
+msgid "That's it, now refresh this page!"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:22
+msgid "There were no cache operations in this request."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:24
+msgid "Cache Utilities"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:28
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:53
+msgid "Engine"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:41
+msgid "Clear All Data"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:49
+msgid "Cache Usage Overview"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:54
+msgid "get hit"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:55
+msgid "get miss"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:56
+msgid "set"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:57
+msgid "delete"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:73
+msgid "Cache Logs"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:77
+msgid "Log"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:115
+msgid "cache cleared."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/cache_panel.php:117
+msgid "cache could not be cleared."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:28
+msgid "Application Constants"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:34
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:59
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:135
+msgid "Constant"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:35
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:60
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:110
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:136
+msgid "Value"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:49
+msgid "No application environment available."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:53
+msgid "CakePHP Constants"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:74
+msgid "CakePHP environment unavailable."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:78
+msgid "INI Environment"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:99
+msgid "ini environment unavailable."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:103
+msgid "PHP Environment"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:109
+msgid "Environment Variable"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:124
+msgid "PHP environment unavailable."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:129
+msgid "Hidef Environment"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/environment_panel.php:150
+msgid "No Hidef environment available."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/history_panel.php:23
+msgid "No previous requests logged."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/history_panel.php:25
+msgid "previous requests available"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/history_panel.php:29
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/history_panel.php:53
+msgid "Back to current request"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/include_panel.php:30
+msgid "Include Paths"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/include_panel.php:33
+msgid "Included Files"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/log_panel.php:21
+msgid "There were no log entries made this request"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/log_panel.php:24
+msgid "{0} Messages"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/log_panel.php:28
+msgid "Time"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/log_panel.php:29
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:32
+msgid "Message"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/mail_panel.php:2
+msgid "Why not test your emails interactively instead? Go to the {0}"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/mail_panel.php:4
+msgid "Email previews page"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/mail_panel.php:8
+msgid "No emails were sent during this request"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/mail_panel.php:17
+msgid "Subject"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:22
+msgid "{0} not found"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:26
+msgid "Check for Updates"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:27
+msgid "Direct dependencies only"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:32
+msgid "Requirements ({0})"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:36
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:62
+msgid "Name"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:37
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:63
+msgid "Version"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:58
+msgid "Dev Requirements ({0})"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/packages_panel.php:99
+msgid "Loading"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:30
+msgid "Warning"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:31
+msgid "Headers already sent at file {0} and line {1}."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:34
+msgid "Routing Params"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:37
+msgid "Post data"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:40
+msgid "No post data."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:49
+msgid "No querystring data."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:59
+msgid "No Cookie data."
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/request_panel.php:63
+msgid "Matched Route"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/routes_panel.php:11
+msgid "Toggle debugkit internal routes"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/routes_panel.php:16
+msgid "Route name"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/routes_panel.php:17
+msgid "URI template"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/routes_panel.php:18
+msgid "Defaults"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:35
+msgid "Generated Models"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:36
+msgid "The following Table objects used {0} instead of a concrete class:"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:58
+msgid "Total Time: {0} ms &mdash; Total Queries: {1} &mdash; Total Rows: {2}"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:71
+msgid "Query"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:72
+msgid "Rows"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:73
+msgid "Took (ms)"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/sql_log_panel.php:91
+msgid "No active database connections"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:23
+msgid "Memory"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:25
+msgid "Peak Memory Use:"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:33
+msgid "Memory Use"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:48
+msgid "Timers"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:50
+msgid "Total Request Time:"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:57
+msgid "Event"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:58
+msgid "Time in ms"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/timer_panel.php:59
+msgid "Timeline"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/variables_panel.php:28
+msgid "Sort variables by name"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/element/variables_panel.php:34
+msgid "Validation errors"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/layout/dashboard.php:6
+msgid "DebugKit Dashboard"
+msgstr ""
+
+#: /home/rlcancian/Laboratory/Software_Lab/Webdesigns/Public/InvestFunds/investFundsClient/vendor/cakephp/debug_kit/templates/layout/mailer.php:6
+msgid "Mailer Previews"
+msgstr ""
+
