@@ -17,6 +17,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,11 +87,8 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 			threadPool.add(thread);
 		}
 		/*
-		synchronized (threadPool) {
-			CustomComparator comparator = new CustomComparator();
-			Collections.sort(threadPool, comparator);
-			comparator = null;
-		}
+		 * synchronized (threadPool) { CustomComparator comparator = new CustomComparator();
+		 * Collections.sort(threadPool, comparator); comparator = null; }
 		 */
 		int pos = threadPool.indexOf(thread);
 		System.out.println("info: thread " + thread.getCSVThreadID() + " incluída na posição " + pos + " da lista para processamento do arquivo " + thread.getDatafilename() + " de tamanho " + thread.getDatafilelength() + " bytes");
@@ -335,21 +334,25 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 	 *
 	 * @return
 	 */
-	public boolean calculateIndicators() {
-		System.out.println("\ninfo: Calculando indicadores financeiros e estatísticos");
+	public boolean calculateDirectIndicators() {
 		try {
+			int id;
+			String strId;
+			String sql;
+			System.out.println("\ninfo: Calculando indicadores financeiros diretos de cada fundo");
 			java.sql.Connection connection;
-			Class.forName(this.JDBC_DRIVER);
+			try {
+				Class.forName(this.JDBC_DRIVER);
+			} catch (ClassNotFoundException ex) {
+				Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
 			connection = DriverManager.getConnection(this.DB_URL + this.databasename, this.databaseUsername, this.databasePassword);
 			connection.setAutoCommit(false);
-			String sql;
 			Statement st = connection.createStatement();
 			Statement st2 = connection.createStatement();
 			sql = "select id from cnpj_fundos order by id"; //////
 			java.sql.ResultSet rs = st.executeQuery(sql);
 			java.sql.ResultSet rs2;
-			int id;
-			String strId;
 			CVMDatabaseThread thread;
 			int count = 0;
 			while (rs.next()) {
@@ -360,7 +363,7 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 					strId = String.valueOf(id);
 					System.out.println("info:  Criando thread para calcular indicadores do fundo " + id);
 					newCSVThreadID++;
-					thread = new CVMDatabaseThread(newCSVThreadID, "table:doc_inf_diario_fundos", strId, strId, JDBC_DRIVER, DB_URL, databasename, databaseUsername, databasePassword, this.forceProcessFiles, this.forceCalculate);
+					thread = new CVMDatabaseThread(newCSVThreadID, "diretorio_calcula_indicadores_diretos_fundos", strId, strId, JDBC_DRIVER, DB_URL, databasename, databaseUsername, databasePassword, this.forceProcessFiles, this.forceCalculate);
 					thread.addListener(this);
 					thread.setActionResultLogger(actionResultLogger);
 					CVMDatabaseManager.AddThread(thread, false); //, (count++ % 10 == 0));
@@ -380,13 +383,225 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 			try {
 				semaphoreAllDone.acquire();
 			} catch (InterruptedException ex) {
+				return false;
 			}
-		} catch (ClassNotFoundException ex) {
-			Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			return true;
 		} catch (SQLException ex) {
 			Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			return false;
 		}
-		return true;
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public boolean calculateMarketIndicators() {
+		try {
+			System.out.println("\ninfo: Calculando indicadores do mercado");
+			java.sql.Connection connection;
+			try {
+				Class.forName(this.JDBC_DRIVER);
+			} catch (ClassNotFoundException ex) {
+				Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			connection = DriverManager.getConnection(this.DB_URL + this.databasename, this.databaseUsername, this.databasePassword);
+			connection.setAutoCommit(false);
+			Statement st = connection.createStatement();
+			Statement st2 = connection.createStatement();
+			Statement st3 = connection.createStatement();
+			java.sql.ResultSet rs;
+			java.sql.ResultSet rs2;
+			String sql;
+			//
+			// Calcula rentabilidades e volatilidade em períodos mensais
+			//
+			int tipo_id, periodoMeses;
+			Double rent;
+			Double rentabilidadeMercado, volatilidadeMercado, sumRentabilidadeMercado, sumRentabilidadeMercadoSquare;
+			Double rentabilidadeClasse, volatilidadeClasse, sumRentabilidadeClasse, sumRentabilidadeClasseSquare;
+			long numValoresMercado, numValoresClasse;
+			LocalDate ultimaData, primeiraData = LocalDate.now();
+			// ASSUME QUE A ÚLTIMA DATA FOI ONTEM (evita uma query sobre todos os fundos para pegar a data mais recente)
+			ultimaData = LocalDate.now().minusDays(1); // rs.getDate("UltimaDataComDados").toLocalDate(); // com dados diários obtidos da CVM
+			long mesesNoPassadoParaUltimaData = 0;
+			//
+			// Calcula indicadores para 1, 2, 3, 6, 12, 24, ... 96 meses no passado, todos terminando no mês passado (em relação a hoje), ou a 2 meses no passado, 3, 4, até terminando 12*2 meses no passado
+			while (mesesNoPassadoParaUltimaData < 12 * 2) {
+				ultimaData = ultimaData.minusMonths(1L);
+				System.out.println("  Procurando fundos com indicadores mensais encerrando em " + ultimaData.getMonthValue() + "/" + ultimaData.getYear());
+				periodoMeses = 1;
+				while (periodoMeses <= 96) {
+					sumRentabilidadeMercado = 0.0;
+					sumRentabilidadeMercadoSquare = 0.0;
+					numValoresMercado = 0;
+					//
+					// varre as classes dos fundos
+					sql = "select * from tipo_classe_fundos order by id";
+					rs = st.executeQuery(sql);
+					while (rs.next()) {
+						tipo_id = rs.getInt("id");
+						//System.out.println("Procurando '" + rs.getString("classe") + "' com indicadores de " + periodoMeses + " meses encerrando em " + ultimaData.getMonthValue() + "/" + ultimaData.getYear());
+						// busca todos os fundos dessa classe com certa data final (mes e ano) e certa quantidade de meses nos indicadores
+						sql = "select indicadores_fundos.cnpj_fundo_id, rentabilidade, data_inicial, data_final from indicadores_fundos "
+								+ " inner join cadastro_fundos on cadastro_fundos.cnpj_fundo_id = indicadores_fundos.cnpj_fundo_id and cadastro_fundos.tipo_classe_fundo_id = " + tipo_id
+								+ " where month(data_final)=" + ultimaData.getMonthValue() + " and year(data_final)=" + ultimaData.getYear() + " and periodo_meses= " + periodoMeses;//"+ " order by ";
+						rs2 = st2.executeQuery(sql);
+						sumRentabilidadeClasse = 0.0;
+						sumRentabilidadeClasseSquare = 0.0;
+						numValoresClasse = 0;
+						while (rs2.next()) {
+							if (sumRentabilidadeClasse == 0.0) {
+								primeiraData = rs2.getDate("data_inicial").toLocalDate();
+								ultimaData = rs2.getDate("data_final").toLocalDate();
+							}
+							rent = rs2.getDouble("rentabilidade");
+							sumRentabilidadeMercado += rent;
+							sumRentabilidadeMercadoSquare += rent * rent;
+							numValoresMercado++;
+							sumRentabilidadeClasse += rent;
+							sumRentabilidadeClasseSquare += rent * rent;
+							numValoresClasse++;
+						}
+						if (numValoresClasse > 0) {
+							rentabilidadeClasse = sumRentabilidadeClasse / numValoresClasse;
+							if (numValoresClasse > 1) {
+								volatilidadeClasse = Math.sqrt(sumRentabilidadeClasseSquare - (sumRentabilidadeClasse * sumRentabilidadeClasse) / numValoresClasse);
+							} else {
+								volatilidadeClasse = 0.0;
+							}
+							// atualiza BD com indicadores dessa classe nesse período de tempo
+							//System.out.println("Atualizando " + numValoresClasse + " '" + rs.getString("classe") + "'  com indicadores de " + periodoMeses + "  meses encerrando em " + ultimaData.getMonthValue() + "/" + ultimaData.getYear());
+
+							try {
+								sql = "insert into indicadores_mercados (tipo_classe_fundos_id, data_inicial, data_final, periodo_meses, num_valores, rentabilidade, desvio_padrao) "
+										+ " values(" + tipo_id + ", '" + primeiraData.toString() + "', '" + ultimaData.toString() + "', " + periodoMeses + ", " + numValoresClasse + ", " + rentabilidadeClasse + ", " + volatilidadeClasse + ")";
+								st3.execute(sql);
+							} catch (SQLException ex) {
+								//System.out.println(ex.getMessage());
+								try {
+									sql = "update indicadores_mercados set data_inicial='" + primeiraData.toString() + "', num_valores=" + numValoresClasse + ", rentabilidade=" + rentabilidadeClasse + ", desvio_padrao=" + volatilidadeClasse + " where tipo_classe_fundos_id=" + tipo_id + " and data_final='" + ultimaData.toString() + "' and periodo_meses=" + periodoMeses;
+									st3.execute(sql);
+								} catch (SQLException ex2) {
+								}
+							}
+						}
+					}
+					if (numValoresMercado > 0) {
+						rentabilidadeMercado = sumRentabilidadeMercado / numValoresMercado;
+						if (numValoresMercado > 1) {
+							volatilidadeMercado = Math.sqrt(sumRentabilidadeMercadoSquare - (sumRentabilidadeMercado * sumRentabilidadeMercado) / numValoresMercado);
+						} else {
+							volatilidadeMercado = 0.0;
+						}
+						// atualiza BD com indicadores de todo o mercado nesse período de tempo
+						System.out.println("    Atualizando " + numValoresMercado + " valores de mercado com indicadores de " + periodoMeses + "  meses encerrando em " + ultimaData.getMonthValue() + "/" + ultimaData.getYear());
+						int tipo_id_mercado = 999;
+						try {
+							sql = "insert into indicadores_mercados (tipo_classe_fundos_id, data_inicial, data_final, periodo_meses, num_valores, rentabilidade, desvio_padrao) "
+									+ " values(" + tipo_id_mercado + ", '" + primeiraData.toString() + "', '" + ultimaData.toString() + "', " + periodoMeses + ", " + numValoresMercado + ", " + rentabilidadeMercado + ", " + volatilidadeMercado + ")";
+							st3.execute(sql);
+						} catch (SQLException ex) {
+							//System.out.println(ex.getMessage());
+							try {
+								sql = "update indicadores_mercados set data_inicial='" + primeiraData.toString() + "', num_valores=" + numValoresMercado + ", rentabilidade=" + rentabilidadeMercado + ", desvio_padrao=" + volatilidadeMercado + " where tipo_classe_fundos_id=" + tipo_id_mercado + " and data_final='" + ultimaData.toString() + "' and periodo_meses=" + periodoMeses;
+								st3.execute(sql);
+							} catch (SQLException ex2) {
+							}
+						}
+						connection.commit();
+					}
+					// atualiza quantidade de meses para a estatistica
+					switch (periodoMeses) {
+						case 1:
+							periodoMeses = 2;
+							break;
+						case 2:
+							periodoMeses = 3;
+							break;
+						case 3:
+							periodoMeses = 6;
+							break;
+						case 6:
+							periodoMeses = 12;
+							break;
+						default:
+							periodoMeses += 12;
+					}
+				}
+				mesesNoPassadoParaUltimaData++;
+			}
+			connection.commit();
+			return true;
+			//}
+		} catch (SQLException ex) {
+			Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			return false;
+		}
+	}
+
+	public boolean calculateIndicatorsBasedOnMarket() {
+		try {
+			System.out.println("\ninfo: Calculando indicadores de fundos baseados no mercado");
+			java.sql.Connection connection;
+			try {
+				Class.forName(this.JDBC_DRIVER);
+			} catch (ClassNotFoundException ex) {
+				Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			connection = DriverManager.getConnection(this.DB_URL + this.databasename, this.databaseUsername, this.databasePassword);
+			connection.setAutoCommit(false);
+			Statement st = connection.createStatement();
+			Statement st2 = connection.createStatement();
+			java.sql.ResultSet rs;
+			java.sql.ResultSet rs2;
+			String sql;
+
+			//
+			// fim dos cálculos do mercardo.
+			// Vai disparar threads para cálculo dos indicadores indiretos (aqueles que dependem do mercado) de cada fundo
+			//
+			System.out.println("\ninfo: Calculando indicadores (de mercado) de cada fundo");
+			sql = "select id from cnpj_fundos order by id";
+			rs = st.executeQuery(sql);
+			CVMDatabaseThread thread;
+			int tipo_id, count = 0;
+			String strId;
+			while (rs.next()) {
+				tipo_id = rs.getInt("id");
+				sql = "select * from cancelamento_fundos use index (idx_id_fundo) where cnpj_fundo_id=" + tipo_id;
+				rs2 = st2.executeQuery(sql);
+				if (!rs2.next()) { // exclui fundos cancelados
+					strId = String.valueOf(tipo_id);
+					System.out.println("info:  Criando thread para calcular indicadores (de mercado) do fundo " + tipo_id);
+					newCSVThreadID++;
+					thread = new CVMDatabaseThread(newCSVThreadID, "diretorio_calcula_indicadores_fundos_baseados_mercado", strId, strId, JDBC_DRIVER, DB_URL, databasename, databaseUsername, databasePassword, this.forceProcessFiles, this.forceCalculate);
+					thread.addListener(this);
+					thread.setActionResultLogger(actionResultLogger);
+					CVMDatabaseManager.AddThread(thread, false); //, (count++ % 10 == 0));
+					if (count++ % 10 == 0) { // a cada 10 threads criadas, libera para executar
+						CVMDatabaseManager.CheckDispatchNewThread();
+						try {
+							semaphoreAllDone.acquire();
+						} catch (InterruptedException ex) {
+						}
+					}
+				} else {
+					////System.out.println("done:  Fundo " + id + " foi cancelado");
+				}
+			}
+			CVMDatabaseManager.CheckDispatchNewThread();
+			System.out.println("info: Aguardando " + total_num_threads + " threads terminarem");
+			try {
+				semaphoreAllDone.acquire();
+			} catch (InterruptedException ex) {
+				return false;
+			}
+			return true;
+		} catch (SQLException ex) {
+			Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			return false;
+		}
 	}
 
 	/**
@@ -406,14 +621,16 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 			try {
 				sql = new String(Files.readAllBytes(Paths.get("./create_investfunds.sql")), StandardCharsets.UTF_8);
 			} catch (IOException ex) {
-				Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(CVMDatabaseManager.class
+						.getName()).log(Level.SEVERE, null, ex);
 			}
 			st.execute(sql);
 			connection.commit();
 			connection.close();
 			return true;
 		} catch (SQLException | ClassNotFoundException ex) {
-			Logger.getLogger(CVMDatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(CVMDatabaseManager.class
+					.getName()).log(Level.SEVERE, null, ex);
 		}
 		return false;
 	}
@@ -426,8 +643,7 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 	}
 
 	/**
-	 * Set the buffer to the appropriate size, which, for the moment is 12G.
-	 * This seriously affects performance.
+	 * Set the buffer to the appropriate size, which, for the moment is 12G. This seriously affects performance.
 	 *
 	 * @return true
 	 */
@@ -448,8 +664,7 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 	}
 
 	/**
-	 * Creates the relevant tables for calculating indicators, calls
-	 * setbufferPoolSize to ensure performance
+	 * Creates the relevant tables for calculating indicators, calls setbufferPoolSize to ensure performance
 	 *
 	 * @return true
 	 */
@@ -689,8 +904,7 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 	}
 
 	/**
-	 * Calculates the indicators and inserts them into the indicators table.
-	 * This is very slow, so be patient!
+	 * Calculates the indicators and inserts them into the indicators table. This is very slow, so be patient!
 	 *
 	 * @return true
 	 */

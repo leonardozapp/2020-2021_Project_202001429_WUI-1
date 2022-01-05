@@ -949,12 +949,10 @@ public class CVMDatabaseThread extends NotifyingThread {
 						CVMDatabaseThread.tb_administrador_fundos.put(CNPJ_ADMIN, ID_ADMIN); // adiciona ao map
 					}
 					// aqui o id do admin é conhecido e está no map e no BD
-					/* sql = "insert INTO FUNDO_ADMIN (cnpj_fundo_id, FK_ID_ADMIN, DATA_REG_CVM) values (" + ID_FUNDO + ", " + ID_ADMIN + ",\"" + dataArquivo + "\")";
-					try {
-					st.execute(sql);
-					} catch (Exception ex) {// sql pode falhar por haver linhas com informações duplicadas no CSV.
-					//System.out.println("Erro " + ex.getMessage());
-					} */
+					/* sql = "insert INTO FUNDO_ADMIN (cnpj_fundo_id, FK_ID_ADMIN, DATA_REG_CVM) values (" + ID_FUNDO +
+					 * ", " + ID_ADMIN + ",\"" + dataArquivo + "\")"; try { st.execute(sql); } catch (Exception ex) {//
+					 * sql pode falhar por haver linhas com informações duplicadas no CSV. //System.out.println("Erro "
+					 * + ex.getMessage()); } */
 				}
 				// aqui o id do admin é conhecido e está no map e no BD
 
@@ -985,12 +983,10 @@ public class CVMDatabaseThread extends NotifyingThread {
 						CVMDatabaseThread.tb_gestor_fundos.put(CNPJ_GESTOR, ID_GESTOR); // adiciona ao map
 					}
 					// aqui o id do gestor é conhecido e está no map e no BD
-					/* sql = "insert INTO FUNDO_GESTOR (cnpj_fundo_id, FK_ID_GESTOR, DATA_REG_CVM) values (" + ID_FUNDO + ", " + ID_GESTOR + ",\"" + dataArquivo + "\")";
-					try {
-					st.execute(sql);
-					} catch (Exception ex) {// sql pode falhar por haver linhas com informações duplicadas no CSV.
-					//System.out.println("Erro " + ex.getMessage());
-					}*/
+					/* sql = "insert INTO FUNDO_GESTOR (cnpj_fundo_id, FK_ID_GESTOR, DATA_REG_CVM) values (" + ID_FUNDO
+					 * + ", " + ID_GESTOR + ",\"" + dataArquivo + "\")"; try { st.execute(sql); } catch (Exception ex)
+					 * {// sql pode falhar por haver linhas com informações duplicadas no CSV.
+					 * //System.out.println("Erro " + ex.getMessage()); } */
 				}
 
 				DT_INI_CLASSE = record[fields.get("DT_INI_CLASSE")].strip();
@@ -1055,9 +1051,91 @@ public class CVMDatabaseThread extends NotifyingThread {
 
 	}
 
-	private Object[] calcula_indicadores_DOC_INF_DIARIO(Connection connection) {
+	private Object[] calcula_indicadores_baseado_mercado(Connection connection) {
 		long inicioProcessamento = System.currentTimeMillis();
-		long tempoProcessamentoParte, tempoProcessamentoTotal=0, fimProcessamento = inicioProcessamento;
+		long tempoProcessamentoParte, tempoProcessamentoTotal = 0, fimProcessamento = inicioProcessamento;
+		Long countRecords = 0L;
+		Long countRecordsComErro = 0L;
+		Long countRecordsRepetidos = 0L;
+		try {
+			//
+			int idFundo = Integer.valueOf(this.datafilename);
+			String sql;
+			Statement st = connection.createStatement();
+			Statement st2 = connection.createStatement();
+			java.sql.ResultSet rs;
+			java.sql.ResultSet rs2;
+
+			//
+			// Calcula indicadores mensais envolvendo o mercado
+			//
+			// calcula sharpe e sharpe da classe
+			sql = "select indicFundos.*, indicMercado.* from indicadores_fundos as indicFundos "
+					+ " inner join cadastro_fundos as cadastro on indicFundos.cnpj_fundo_id = cadastro.cnpj_fundo_id "
+					+ " inner join indicadores_mercados as indicMercado on cadastro.tipo_classe_fundo_id = indicMercado.tipo_classe_fundos_id "
+					+ "        and indicFundos.data_final = indicMercado.data_final and indicFundos.periodo_meses = indicMercado.periodo_meses "
+					+ " where indicFundos.cnpj_fundo_id=" + idFundo
+					+ " order by indicFundos.data_final desc, indicFundos.periodo_meses asc";
+			rs = st.executeQuery(sql);
+			Double rf, vf, rm, vm, sharpe, sharpeGenClasse;
+			while (rs.next()) {
+				rf = rs.getDouble("indicFundos.rentabilidade");
+				vf = rs.getDouble("indicFundos.desvio_padrao");
+				rm = rs.getDouble("indicMercado.rentabilidade");
+				vm = rs.getDouble("indicMercado.desvio_padrao");
+				sharpe = (rf - rm) / vf;
+				sharpeGenClasse = (rf - rm) / (vf - vm);
+				try {
+					sql = "update indicadores_fundos set sharpe=" + sharpe + ", sharpe_geral_classe=" + sharpeGenClasse
+							+ " where cnpj_fundo_id=" + idFundo + " and data_final='" + rs.getDate("indicFundos.data_final") + "' and periodo_meses=" + rs.getInt("indicFundos.periodo_meses");
+					st2.execute(sql);
+				} catch (Exception e) {
+					System.out.println("Erro " + e.getMessage());
+				}
+			}
+			connection.commit();
+			// calcula sharpe do mercado
+			int tipo_mercado_id = 999;
+			sql = "select indicFundos.*, indicMercado.* from indicadores_fundos as indicFundos "
+					+ " inner join indicadores_mercados as indicMercado on indicMercado.tipo_classe_fundos_id="+tipo_mercado_id
+					+ "        and indicFundos.data_final = indicMercado.data_final and indicFundos.periodo_meses = indicMercado.periodo_meses "
+					+ " where indicFundos.cnpj_fundo_id=" + idFundo
+					+ " order by indicFundos.data_final desc, indicFundos.periodo_meses asc";
+			rs = st.executeQuery(sql);
+			Double sharpeGenMercado;
+			while (rs.next()) {
+				rf = rs.getDouble("indicFundos.rentabilidade");
+				vf = rs.getDouble("indicFundos.desvio_padrao");
+				rm = rs.getDouble("indicMercado.rentabilidade");
+				vm = rs.getDouble("indicMercado.desvio_padrao");
+				sharpeGenMercado = (rf - rm) / (vf - vm);
+				try {
+					sql = "update indicadores_fundos set sharpe_geral_mercado=" + sharpeGenMercado
+							+ " where cnpj_fundo_id=" + idFundo + " and data_final='" + rs.getDate("indicFundos.data_final") + "' and periodo_meses=" + rs.getInt("indicFundos.periodo_meses");
+					st2.execute(sql);
+				} catch (Exception e) {
+					System.out.println("Erro " + e.getMessage());
+				}
+			}
+			connection.commit();
+			//
+			// calcula indicador beta
+			//
+			// o cálculo do indicador beta é complicado, pois demanda rentabilidade diária do fundo (ok) e do mercado (não ok) num certo período
+			// poderia ser feito com base nas rentabilidades mensais... (teria que pegar rentabilidades mensais de 1 mês --já calculadas--) e usar como se fossem diárias
+			//
+			// ...
+		} catch (SQLException ex) {
+			Logger.getLogger(CVMDatabaseThread.class.getName()).log(Level.SEVERE, null, ex);
+			countRecordsComErro++;
+		}
+		Object[] result = {countRecords, countRecordsComErro, countRecordsRepetidos};
+		return result;
+	}
+
+	private Object[] calcula_indicadores_diretos(Connection connection) {
+		long inicioProcessamento = System.currentTimeMillis();
+		long tempoProcessamentoParte, tempoProcessamentoTotal = 0, fimProcessamento = inicioProcessamento;
 		Long countRecords = 0L;
 		Long countRecordsComErro = 0L;
 		Long countRecordsRepetidos = 0L;
@@ -1079,7 +1157,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 				sql = "select VL_QUOTA, DT_COMPTC from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and (rentab_diaria is null or volat_diaria is null) order by DT_COMPTC ASC"; // registros sem rentabilidade, para calcular
 				rs = st.executeQuery(sql);
 				if (rs.next()) {
-					Double valorQuotaAnterior, rentabAcumulAnterior, valorQuotaAtual, rentabilidade, volatilidade, rentabilidadeAcumulada, maxValorQuota, drawdown, temp;//, somaRent;
+					Double valorQuotaAnterior, rentabAcumulAnterior, valorQuotaAtual, rentabilidadeDiaria, volatilidadeDiaria, rentabilidadeAcumulada, maxValorQuota, drawdown, temp;//, somaRent;
 					Double rent1 = Double.NaN, rent2 = Double.NaN, rent3 = Double.NaN;
 					String dataAtual;
 					String firstEmptyDate = rs.getDate("DT_COMPTC").toString(); // primeira data sem rentabilidade calculada. Tenta buscar a última rentabilidade calculada antes dessa
@@ -1109,23 +1187,23 @@ public class CVMDatabaseThread extends NotifyingThread {
 						valorQuotaAtual = rs.getDouble("VL_QUOTA");
 						dataAtual = rs.getDate("DT_COMPTC").toString();
 						if (valorQuotaAnterior != 0.0) {
-							rentabilidade = (valorQuotaAtual - valorQuotaAnterior) / valorQuotaAnterior;
-							if (rentabilidade.isNaN() || rentabilidade.isInfinite()) {
-								rentabilidade = 0.0;
+							rentabilidadeDiaria = (valorQuotaAtual - valorQuotaAnterior) / valorQuotaAnterior;
+							if (rentabilidadeDiaria.isNaN() || rentabilidadeDiaria.isInfinite()) {
+								rentabilidadeDiaria = 0.0;
 							}
 						} else {
-							rentabilidade = 0.0;
+							rentabilidadeDiaria = 0.0;
 						}
-						rentabilidadeAcumulada = rentabAcumulAnterior + rentabilidade;
+						rentabilidadeAcumulada = rentabAcumulAnterior + rentabilidadeDiaria;
 						// calcula volatilidade
 						rent1 = rent2;
 						rent2 = rent3;
-						rent3 = rentabilidade;
+						rent3 = rentabilidadeDiaria;
 						if (!rent1.isNaN()) {
 							temp = (rent1 + rent2 + rent3) / 3; // TODO: Conferir: a volatilidade diária é calculada com base numa média dos últimos 3 dias.
-							volatilidade = Math.sqrt((Math.pow(rent1 - temp, 2) + Math.pow(rent2 - temp, 2) + Math.pow(rent3 - temp, 2)) / 2);//2=n-1
+							volatilidadeDiaria = Math.sqrt((Math.pow(rent1 - temp, 2) + Math.pow(rent2 - temp, 2) + Math.pow(rent3 - temp, 2)) / 2);//2=n-1
 						} else {
-							volatilidade = 0.0;
+							volatilidadeDiaria = 0.0;
 						}
 						//
 						// calcula drawdown
@@ -1138,7 +1216,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 							drawdown = 0.0;
 						}
 						// salva no BD
-						sql = "update doc_inf_diario_fundos set rentab_diaria=" + rentabilidade + ", rentab_acumulada=" + rentabilidadeAcumulada + ", volat_diaria=" + volatilidade + ", drawdown=" + drawdown + " where cnpj_fundo_id=" + idFundo + " and DT_COMPTC='" + dataAtual + "'";
+						sql = "update doc_inf_diario_fundos set rentab_diaria=" + rentabilidadeDiaria + ", rentab_acumulada=" + rentabilidadeAcumulada + ", volat_diaria=" + volatilidadeDiaria + ", drawdown=" + drawdown + " where cnpj_fundo_id=" + idFundo + " and DT_COMPTC='" + dataAtual + "'";
 						st2.execute(sql);
 						// TODO check por substituir as linhas anteriores por
 						//rs.updateDouble("rentab_diaria", rentabilidade);
@@ -1251,7 +1329,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 										}
 										if (numMeses == 1 || numMeses == 2 || numMeses == 3 || numMeses == 6 || numMeses % 12 == 0) {
 											// salva no BD
-											sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_bench, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
+											sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_mercado, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
 											try {
 												st2.execute(sql);
 												countRecords++;
@@ -1274,7 +1352,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 								// TODO: // deve gravar os primeiros meses para ter um registro do período máximo do fundo (desde que haja pelo menos 1 mes de dados)
 								// salva no BD
 								if (numMeses > 0) {
-									sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_bench, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
+									sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_mercado, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
 									try {
 										st2.execute(sql);
 										countRecords++;
@@ -1356,12 +1434,19 @@ public class CVMDatabaseThread extends NotifyingThread {
 					// processa informações de cadastro (
 					result = processa_INTERMEDIARIO_CAD(connection);
 					break;
-				case "table:doc_inf_diario_fundos":
+				case "diretorio_calcula_indicadores_diretos_fundos":
 					// processa informações de cadastro (
-					result = calcula_indicadores_DOC_INF_DIARIO(connection);
+					result = calcula_indicadores_diretos(connection);
 					action = ActionResultLogger.Action.INDICADORS_CALCULATED.toString();
 					saveAction = false;
 					break;
+				case "diretorio_calcula_indicadores_fundos_baseados_mercado":
+					// processa informações de cadastro (
+					result = this.calcula_indicadores_baseado_mercado(connection);
+					action = ActionResultLogger.Action.INDICADORS_CALCULATED.toString();
+					saveAction = false;
+					break;
+
 				// processa info de ações
 				case "CIA_ABERTA/CAD/DADOS/":
 					result = insere_cias_meta(connection);
@@ -1398,6 +1483,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 					break;
 				default:
 					System.out.println("info: [" + this.csvThreadID + "] Sem especificção de como processar o arquivo \"" + datafilename + "\"");
+					result = new Object[3];
 					break;
 			}
 			// get results

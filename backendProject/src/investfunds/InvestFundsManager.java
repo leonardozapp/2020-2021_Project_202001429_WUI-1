@@ -147,9 +147,11 @@ public class InvestFundsManager implements ActionResultLogger {
 		isOk = cvmdbman.fillCiaDatabases();
 		isOk = cvmdbman.calculateCIAIndicators();
 		*/	
-		//isOk = downloadDataFromCVM();
-		//isOk = cvmdbman.fillDatabases();
-		isOk = cvmdbman.calculateIndicators();
+		isOk = downloadDataFromCVM();
+		isOk = cvmdbman.fillDatabases();
+		isOk = cvmdbman.calculateDirectIndicators();
+		isOk = cvmdbman.calculateMarketIndicators();
+		isOk = cvmdbman.calculateIndicatorsBasedOnMarket();
 
 		recordAction(new ActionResultLogger.ActionResult(ActionResultLogger.Action.END_UPDATE.toString(), null, null, null, !isOk, null, new Date(), !isOk));
 		reportLastUpdate();

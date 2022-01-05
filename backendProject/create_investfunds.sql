@@ -1,8 +1,12 @@
-SET FOREIGN_KEY_CHECKS=0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
 CREATE DATABASE IF NOT EXISTS `investfunds` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
-USE investfunds;
+USE `investfunds`;
 
 CREATE TABLE IF NOT EXISTS `administrador_fundos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -94,6 +98,14 @@ CREATE TABLE IF NOT EXISTS `cias_bpps` (
   `VL_CONTA` decimal(29,10) DEFAULT NULL,
   `ST_CONTA_FIXA` varchar(1) DEFAULT NULL,
   PRIMARY KEY (`CNPJ_CIA`,`DT_REFER`,`CD_CONTA`,`ORDEM_EXERC`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `cias_cods_b3s` (
+  `CD_B3` varchar(20) NOT NULL,
+  `CNPJ_CIA` varchar(20) DEFAULT NULL,
+  `DENOM_CIA` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`CD_B3`),
+  KEY `cnpj_cias_abertas_cod_b3_FK` (`CNPJ_CIA`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `cias_dfcs_mds` (
@@ -211,15 +223,6 @@ CREATE TABLE IF NOT EXISTS `cnpj_cias_abertas` (
   `tipo_situacao_fundos_id` int(11) NOT NULL,
   `tipo_setor_ativ_cias_abertas_id` int(11) NOT NULL,
   PRIMARY KEY (`CNPJ_CIA`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS `cnpj_cias_abertas_cod_b3` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `CD_B3` varchar(20) NOT NULL,
-  `CNPJ_CIA` varchar(20) DEFAULT NULL,
-  `DENOM_CIA` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `cnpj_cias_abertas_cod_b3_FK` (`CNPJ_CIA`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `cnpj_fundos` (
@@ -542,23 +545,43 @@ CREATE TABLE IF NOT EXISTS `indicadores_carteiras` (
 
 CREATE TABLE IF NOT EXISTS `indicadores_fundos` (
   `cnpj_fundo_id` int(11) NOT NULL,
+  `data_inicial` date NOT NULL,
+  `data_final` date NOT NULL,
   `periodo_meses` int(11) NOT NULL,
-  `data_final` date NOT NULL DEFAULT current_timestamp(),
+  `num_valores` int(11) DEFAULT NULL,
+  `meses_acima_bench` int(11) DEFAULT NULL,
   `rentabilidade` decimal(27,12) NOT NULL,
   `desvio_padrao` decimal(27,12) NOT NULL,
-  `num_valores` int(11) DEFAULT NULL,
   `rentab_min` decimal(27,12) DEFAULT NULL,
   `rentab_max` decimal(27,12) DEFAULT NULL,
   `max_drawdown` decimal(27,12) NOT NULL,
-  `meses_acima_bench` int(11) DEFAULT NULL,
   `sharpe` decimal(27,12) DEFAULT NULL,
-  `sharpe_geral_bench` decimal(27,12) DEFAULT NULL,
+  `sharpe_geral_mercado` decimal(27,12) DEFAULT NULL,
   `sharpe_geral_classe` decimal(27,12) DEFAULT NULL,
   `beta` decimal(27,12) DEFAULT NULL,
+  `covar_fundo` decimal(27,12) DEFAULT NULL,
+  `covar_classe` decimal(27,12) DEFAULT NULL,
+  `covar_mercado` decimal(27,12) DEFAULT NULL,
   PRIMARY KEY (`cnpj_fundo_id`,`periodo_meses`,`data_final`),
   UNIQUE KEY `UNIQUE_VALS` (`cnpj_fundo_id`,`periodo_meses`,`data_final`) USING BTREE,
-  KEY `IDX_DATA_FINAL` (`data_final`) USING BTREE,
-  KEY `IDX_CNPJ` (`cnpj_fundo_id`) USING BTREE
+  KEY `IDX_DATA_FINAL` (`cnpj_fundo_id`,`data_final`,`periodo_meses`) USING BTREE,
+  KEY `IDX_PERIODO_MESES` (`cnpj_fundo_id`,`periodo_meses`,`data_final`) USING BTREE,
+  KEY `IDX_CNPJ` (`cnpj_fundo_id`,`data_final`,`num_valores`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `indicadores_mercados` (
+  `tipo_classe_fundos_id` int(11) NOT NULL,
+  `data_inicial` date NOT NULL,
+  `data_final` date NOT NULL,
+  `periodo_meses` int(11) NOT NULL,
+  `num_valores` int(11) DEFAULT NULL,
+  `rentabilidade` decimal(27,12) NOT NULL,
+  `desvio_padrao` decimal(27,12) NOT NULL,
+  PRIMARY KEY (`tipo_classe_fundos_id`,`periodo_meses`,`data_final`),
+  UNIQUE KEY `UNIQUE_VALS` (`tipo_classe_fundos_id`,`periodo_meses`,`data_final`) USING BTREE,
+  KEY `IDX_DATA_FINAL` (`tipo_classe_fundos_id`,`data_final`,`periodo_meses`) USING BTREE,
+  KEY `IDX_PERIODO_MESES` (`tipo_classe_fundos_id`,`periodo_meses`,`data_final`) USING BTREE,
+  KEY `IDX_CNPJ` (`tipo_classe_fundos_id`,`data_final`,`num_valores`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `intermediarios` (
@@ -980,5 +1003,7 @@ ALTER TABLE `indicadores_fundos`
 ALTER TABLE `situacao_fundos`
   ADD CONSTRAINT `FK_ID_FUNDO` FOREIGN KEY (`cnpj_fundo_id`) REFERENCES `cnpj_fundos` (`id`),
   ADD CONSTRAINT `FK_ID_SIT` FOREIGN KEY (`tipo_situacao_fundo_id`) REFERENCES `tipo_situacao_fundos` (`ID`);
-SET FOREIGN_KEY_CHECKS=1;
 
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
