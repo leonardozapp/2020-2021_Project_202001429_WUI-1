@@ -356,7 +356,7 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 				id = rs.getInt("id");
 				sql = "select * from cancelamento_fundos use index (idx_id_fundo) where cnpj_fundo_id=" + id;
 				rs2 = st2.executeQuery(sql);
-				if (!rs2.next()) {
+				if (!rs2.next()) { // exclui fundos cancelados
 					strId = String.valueOf(id);
 					System.out.println("info:  Criando thread para calcular indicadores do fundo " + id);
 					newCSVThreadID++;
@@ -364,11 +364,15 @@ public class CVMDatabaseManager implements ThreadCompleteListener {
 					thread.addListener(this);
 					thread.setActionResultLogger(actionResultLogger);
 					CVMDatabaseManager.AddThread(thread, false); //, (count++ % 10 == 0));
-					//if (count++ % 10 == 0) { // a cada 10 threads criadas, libera para executar
-					//	CVMDatabaseManager.CheckDispatchNewThread();
-					//}
+					if (count++ % 10 == 0) { // a cada 10 threads criadas, libera para executar
+						CVMDatabaseManager.CheckDispatchNewThread();
+						//try {
+						//	semaphoreAllDone.acquire();
+						//} catch (InterruptedException ex) {
+						//}
+					}
 				} else {
-					System.out.println("done:  Fundo " + id + " foi cancelado");
+					////System.out.println("done:  Fundo " + id + " foi cancelado");
 				}
 			}
 			CVMDatabaseManager.CheckDispatchNewThread();

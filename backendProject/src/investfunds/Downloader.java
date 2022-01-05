@@ -198,7 +198,7 @@ public class Downloader implements ThreadCompleteListener {
 							actionResultLogger.recordAction(new ActionResultLogger.ActionResult(ActionResultLogger.Action.EXTRACTED.toString(), fileZip, entry.getName(), entry.getSize(), Boolean.FALSE, null, new Date(), Boolean.FALSE));
 							System.out.println(" (" + Downloader.FileSizeStr(fileToCreate.toFile().length()) + ")");
 						} else {
-							////System.out.print("done:      " + id + "Arquivo previamente descompactado em " + result.date.toString() + " : " + entry.getName());
+							System.out.print("done:      " + id + "Arquivo previamente descompactado em " + result.date.toString() + " : " + entry.getName());
 						}
 					}
 				} catch (IOException ei) {

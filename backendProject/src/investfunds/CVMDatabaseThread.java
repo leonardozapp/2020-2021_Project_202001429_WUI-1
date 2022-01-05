@@ -906,7 +906,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 				} catch (Exception ex) { // sql pode falhar por haver linhas com informações duplicadas no CSV, e falha no unique da tabela. Realmente não deve inserir novamente
 					//countRecordsRepetidos++;
 				}
-				// cadastra data de cancelamento, se existir
+				// cadastra data de cancelamento, se existir //TODO: VERIFICAR ISSO
 				DT_CANCEL = record[fields.get("DT_CANCEL")].strip();
 				if (!DT_CANCEL.isEmpty()) {
 					sql = "insert into cancelamento_fundos (cnpj_fundo_id, DT_CANCEL, DT_REG_CVM) values (" + ID_FUNDO + ", \"" + DT_CANCEL + "\", \"" + dataArquivo + "\")";
@@ -1057,7 +1057,7 @@ public class CVMDatabaseThread extends NotifyingThread {
 
 	private Object[] calcula_indicadores_DOC_INF_DIARIO(Connection connection) {
 		long inicioProcessamento = System.currentTimeMillis();
-		long tempoProcessamentoParte, tempoProcessamentoTotal, fimProcessamento = inicioProcessamento;
+		long tempoProcessamentoParte, tempoProcessamentoTotal=0, fimProcessamento = inicioProcessamento;
 		Long countRecords = 0L;
 		Long countRecordsComErro = 0L;
 		Long countRecordsRepetidos = 0L;
@@ -1073,91 +1073,97 @@ public class CVMDatabaseThread extends NotifyingThread {
 			//	System.err.println("AQUI");
 			//}
 
-			sql = "select VL_QUOTA, DT_COMPTC from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and (volat_diaria is null) order by DT_COMPTC ASC"; // registros sem rentabilidade, para calcular
-			rs = st.executeQuery(sql);
-			if (rs.next()) {
-				Double valorQuotaAnterior, rentabAcumulAnterior, valorQuotaAtual, rentabilidade, volatilidade, rentabilidadeAcumulada, maxValorQuota, drawdown, temp;//, somaRent;
-				Double rent1 = Double.NaN, rent2 = Double.NaN, rent3 = Double.NaN;
-				String dataAtual;
-				String firstEmptyDate = rs.getDate("DT_COMPTC").toString(); // primeira data sem rentabilidade calculada. Tenta buscar a última rentabilidade calculada antes dessa
-				sql = "select VL_QUOTA, rentab_acumulada from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and (volat_diaria is not null) and DT_COMPTC<'" + firstEmptyDate + "' order by DT_COMPTC DESC";
-				rs2 = st2.executeQuery(sql);
-				if (rs2.next()) { // há valores anteriores à faixa de valores vazios. Pega o último valor de cota conhecido antes disso
-					valorQuotaAnterior = rs2.getDouble("VL_QUOTA");
-					rentabAcumulAnterior = rs2.getDouble("rentab_acumulada");
-					sql = "select Max(VL_QUOTA) as MAX_VL_QUOTA from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and DT_COMPTC<'" + firstEmptyDate + "' order by DT_COMPTC DESC";
-					rs2 = st2.executeQuery(sql);
-					if (rs2.next()) {
-						maxValorQuota = rs2.getDouble("MAX_VL_QUOTA");
-					} else {
-						// nunc deveria acontecer
-						maxValorQuota = 0.0; //?????
-					}
-				} else {
-					// não há valores anteriores. Então o valor anterior deve ser o primeiro valor da quota no período sem valores calculados
-					valorQuotaAnterior = rs.getDouble("VL_QUOTA");
-					rentabAcumulAnterior = 0.0;
-					maxValorQuota = valorQuotaAnterior;
-				}
-				// tendo um valor anterior, varre todo o período calculando a rentabilidade
-				do {
-					// calcula rentabilidades
-					valorQuotaAtual = rs.getDouble("VL_QUOTA");
-					dataAtual = rs.getDate("DT_COMPTC").toString();
-					if (valorQuotaAnterior != 0.0) {
-						rentabilidade = (valorQuotaAtual - valorQuotaAnterior) / valorQuotaAnterior;
-					} else {
-						rentabilidade = 0.0;
-					}
-					if (rentabilidade.isNaN() || rentabilidade.isInfinite()) {
-						rentabilidade = 0.0;
-					}
-					rentabilidadeAcumulada = rentabAcumulAnterior + rentabilidade;
-					// calcula volatilidade
-					rent1 = rent2;
-					rent2 = rent3;
-					rent3 = rentabilidade;
-					if (!rent1.isNaN()) {
-						temp = (rent1 + rent2 + rent3) / 3; // TODO: Conferir: a volatilidade diária é calculada com base numa média dos últimos 3 dias.
-						volatilidade = Math.sqrt((Math.pow(rent1 - temp, 2) + Math.pow(rent2 - temp, 2) + Math.pow(rent3 - temp, 2)) / 2);//2=n-1
-					} else {
-						volatilidade = 0.0;
-					}
-					//
-					// calcula drawdown
-					if (valorQuotaAtual > maxValorQuota) {
-						maxValorQuota = valorQuotaAtual;
-					}
-					if (valorQuotaAtual < maxValorQuota) {
-						drawdown = valorQuotaAtual / maxValorQuota - 1.0;
-					} else {
-						drawdown = 0.0;
-					}
-					// salva no BD
-					sql = "update doc_inf_diario_fundos set rentab_diaria=" + rentabilidade + ", rentab_acumulada=" + rentabilidadeAcumulada + ", volat_diaria=" + volatilidade + ", drawdown=" + drawdown + " where cnpj_fundo_id=" + idFundo + " and DT_COMPTC='" + dataAtual + "'";
-					st2.execute(sql);
-					// TODO check por substituir as linhas anteriores por
-					//rs.updateDouble("rentab_diaria", rentabilidade);
-					//
-					countRecords++;
-					if (countRecords % 1e2 == 0) {
-						connection.commit();
-						if (countRecords % 1e3 == 0) {
-							tempoProcessamentoParte = (System.currentTimeMillis() - fimProcessamento);
-							tempoProcessamentoTotal = (System.currentTimeMillis() - inicioProcessamento);
-							System.out.println("info:      [" + this.csvThreadID + "] " + countRecords / 1e3 + "K registros processados até o momento (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
-							fimProcessamento = System.currentTimeMillis();
-						}
-					}
-					// atualiza vars
-					valorQuotaAnterior = valorQuotaAtual;
-					rentabAcumulAnterior = rentabilidadeAcumulada;
-				} while (rs.next());
-				connection.commit();
+			while (countRecordsRepetidos == 0L) { // calcula indicadores diários para todos os intervalos de datas em que eles estiverem vazios
 				//
-			} else {// não há valores vazios a serem calculados nos indicadores diários. Estão todos calculados e prontos. Não há o que fazer (ou simplesmente não há qualquer registro nos informativos diários
-				countRecordsRepetidos++;
+				// completa indicadores diários para qualquer período que eles ainda estejam vazios
+				sql = "select VL_QUOTA, DT_COMPTC from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and (rentab_diaria is null or volat_diaria is null) order by DT_COMPTC ASC"; // registros sem rentabilidade, para calcular
+				rs = st.executeQuery(sql);
+				if (rs.next()) {
+					Double valorQuotaAnterior, rentabAcumulAnterior, valorQuotaAtual, rentabilidade, volatilidade, rentabilidadeAcumulada, maxValorQuota, drawdown, temp;//, somaRent;
+					Double rent1 = Double.NaN, rent2 = Double.NaN, rent3 = Double.NaN;
+					String dataAtual;
+					String firstEmptyDate = rs.getDate("DT_COMPTC").toString(); // primeira data sem rentabilidade calculada. Tenta buscar a última rentabilidade calculada antes dessa
+					sql = "select VL_QUOTA, rentab_acumulada from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and (rentab_diaria is not null and volat_diaria is not null) and DT_COMPTC<'" + firstEmptyDate + "' order by DT_COMPTC DESC";
+					rs2 = st2.executeQuery(sql);
+					if (rs2.next()) { // há valores anteriores à faixa de valores vazios. Pega o último valor de cota conhecido antes disso
+						valorQuotaAnterior = rs2.getDouble("VL_QUOTA");
+						rentabAcumulAnterior = rs2.getDouble("rentab_acumulada");
+						sql = "select Max(VL_QUOTA) as MAX_VL_QUOTA from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and DT_COMPTC<'" + firstEmptyDate + "' order by DT_COMPTC DESC";
+						rs2 = st2.executeQuery(sql);
+						if (rs2.next()) {
+							maxValorQuota = rs2.getDouble("MAX_VL_QUOTA");
+						} else {
+							// nunc deveria acontecer
+							maxValorQuota = 0.0; //?????
+							System.out.println("ERRO: MAX_VL_QUOTA não encontrado. Maior valor de quota = 0");
+						}
+					} else {
+						// não há valores anteriores. Então o valor anterior deve ser o primeiro valor da quota no período sem valores calculados
+						valorQuotaAnterior = rs.getDouble("VL_QUOTA");
+						rentabAcumulAnterior = 0.0;
+						maxValorQuota = valorQuotaAnterior;
+					}
+					// tendo um valor anterior, varre todo o período calculando a rentabilidade
+					do {
+						// calcula rentabilidades
+						valorQuotaAtual = rs.getDouble("VL_QUOTA");
+						dataAtual = rs.getDate("DT_COMPTC").toString();
+						if (valorQuotaAnterior != 0.0) {
+							rentabilidade = (valorQuotaAtual - valorQuotaAnterior) / valorQuotaAnterior;
+							if (rentabilidade.isNaN() || rentabilidade.isInfinite()) {
+								rentabilidade = 0.0;
+							}
+						} else {
+							rentabilidade = 0.0;
+						}
+						rentabilidadeAcumulada = rentabAcumulAnterior + rentabilidade;
+						// calcula volatilidade
+						rent1 = rent2;
+						rent2 = rent3;
+						rent3 = rentabilidade;
+						if (!rent1.isNaN()) {
+							temp = (rent1 + rent2 + rent3) / 3; // TODO: Conferir: a volatilidade diária é calculada com base numa média dos últimos 3 dias.
+							volatilidade = Math.sqrt((Math.pow(rent1 - temp, 2) + Math.pow(rent2 - temp, 2) + Math.pow(rent3 - temp, 2)) / 2);//2=n-1
+						} else {
+							volatilidade = 0.0;
+						}
+						//
+						// calcula drawdown
+						if (valorQuotaAtual > maxValorQuota) {
+							maxValorQuota = valorQuotaAtual;
+						}
+						if (valorQuotaAtual < maxValorQuota) {
+							drawdown = valorQuotaAtual / maxValorQuota - 1.0;
+						} else {
+							drawdown = 0.0;
+						}
+						// salva no BD
+						sql = "update doc_inf_diario_fundos set rentab_diaria=" + rentabilidade + ", rentab_acumulada=" + rentabilidadeAcumulada + ", volat_diaria=" + volatilidade + ", drawdown=" + drawdown + " where cnpj_fundo_id=" + idFundo + " and DT_COMPTC='" + dataAtual + "'";
+						st2.execute(sql);
+						// TODO check por substituir as linhas anteriores por
+						//rs.updateDouble("rentab_diaria", rentabilidade);
+						//
+						countRecords++;
+						if (countRecords % 1e2 == 0) {
+							connection.commit();
+							if (countRecords % 1e3 == 0) {
+								tempoProcessamentoParte = (System.currentTimeMillis() - fimProcessamento);
+								tempoProcessamentoTotal = (System.currentTimeMillis() - inicioProcessamento);
+								System.out.println("info:      [" + this.csvThreadID + "] " + countRecords / 1e3 + "K registros processados até o momento (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
+								fimProcessamento = System.currentTimeMillis();
+							}
+						}
+						// atualiza vars
+						valorQuotaAnterior = valorQuotaAtual;
+						rentabAcumulAnterior = rentabilidadeAcumulada;
+					} while (rs.next());
+					connection.commit();
+					//
+				} else {// não há valores vazios a serem calculados nos indicadores diários. Estão todos calculados e prontos. Não há o que fazer (ou simplesmente não há qualquer registro nos informativos diários
+					countRecordsRepetidos++;
+				}
 			}
+
 			//
 			// Calcula rentabilidades e outros indicadores em períodos mensais
 			//
@@ -1168,70 +1174,107 @@ public class CVMDatabaseThread extends NotifyingThread {
 					// há um fundo cadastrado sem qualquer informação diária
 					// TODO: Registrar isso!!!
 				} else {
-					LocalDate ultimaData = rs.getDate("UltimaDataComDados").toLocalDate();
-					String primeiroDiaAposUltimoMesCompleto = "0" + String.valueOf(ultimaData.getMonthValue());
-					primeiroDiaAposUltimoMesCompleto = String.valueOf(ultimaData.getYear()) + "-" + primeiroDiaAposUltimoMesCompleto.substring(primeiroDiaAposUltimoMesCompleto.length() - 2) + "-01";
-					sql = "select VL_QUOTA, DT_COMPTC, rentab_diaria from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and DT_COMPTC<'" + primeiroDiaAposUltimoMesCompleto + "' order by DT_COMPTC DESC"; //calcula indicadores do último dia para trás, até o limite máximo de meses definido abaixo
-					rs = st.executeQuery(sql);
-					if (rs.next()) {
-						String dataFinal = rs.getDate("DT_COMPTC").toString();
-						// verifica se já existe
-						sql = "select cnpj_fundo_id from indicadores_fundos where cnpj_fundo_id=" + idFundo + " and periodo_meses=1 and data_final='" + dataFinal + "'";
-						rs2 = st2.executeQuery(sql);
-						if (!rs2.next()) { // se não há nada de um mês, não deve haver os demais também; então calcula tudo. Se há, não faz nada
-							Month mesAnterior = rs.getDate("DT_COMPTC").toLocalDate().getMonth();
-							Month mesAtual;
-							Double rentabilidade, sumRentabilidade = 0.0, minRentabilidade = 1e6, maxRentabilidade = -1e6;
-							ArrayList<Double> rentabilidades = new ArrayList<>();
-							ArrayList<Double> quotas = new ArrayList<>();
-							Integer numValores = 0, numMeses = 0;
-							do {
-								mesAtual = rs.getDate("DT_COMPTC").toLocalDate().getMonth();
-								if (mesAtual.equals(mesAnterior)) {
-									// acumula
-									numValores++;
-									quotas.add(0, rs.getDouble("VL_QUOTA")); // inclui em ordem cronológica para posterior cálculo do MaxDrawdown
-									rentabilidade = rs.getDouble("rentab_diaria");
-									rentabilidades.add(rentabilidade);
-									sumRentabilidade += rentabilidade;
-									if (rentabilidade < minRentabilidade) {
-										minRentabilidade = rentabilidade;
-									}
-									if (rentabilidade > maxRentabilidade) {
-										maxRentabilidade = rentabilidade;
-									}
-								} else {
-									// calcula indicadores do mês que terminou (e de todos os outros meses que já passou, de forma acumulada)
-									mesAnterior = mesAtual;
-									numMeses++;
-									Double rentabilidadeMedia = sumRentabilidade / numValores;
-									Double sumDesvioPadrao = 0.0;
-									for (Double rent : rentabilidades) {
-										sumDesvioPadrao += Math.pow(rent - rentabilidadeMedia, 2);
-									}
-									Double desvioPadrao;
-									if (numValores > 1) {//pois n-1 == 0
-										desvioPadrao = Math.sqrt(sumDesvioPadrao / (numValores - 1));
+					LocalDate ultimaData = rs.getDate("UltimaDataComDados").toLocalDate(); // com dados diários obtidos da CVM
+					long mesesNoPassadoParaUltimaData = 0;
+					//
+					// Calcula indicadores para 1, 2, 3, 6, 12, 24, ... meses no passado, todos terminando no mês passado (em relação a hoje), ou a 2 meses no passado, 3, 4, até terminando 12*5 meses no passado
+					while (mesesNoPassadoParaUltimaData < 12 * 2) {
+						ultimaData = ultimaData.minusMonths(1L);
+						String primeiroDiaAposUltimoMesCompleto = "0" + String.valueOf(ultimaData.getMonthValue());
+						primeiroDiaAposUltimoMesCompleto = String.valueOf(ultimaData.getYear()) + "-" + primeiroDiaAposUltimoMesCompleto.substring(primeiroDiaAposUltimoMesCompleto.length() - 2) + "-01";
+						sql = "select VL_QUOTA, DT_COMPTC, rentab_diaria from doc_inf_diario_fundos where cnpj_fundo_id=" + idFundo + " and DT_COMPTC<'" + primeiroDiaAposUltimoMesCompleto + "' order by DT_COMPTC DESC"; //calcula indicadores do último dia para trás, até o limite máximo de meses definido abaixo
+						rs = st.executeQuery(sql);
+						if (rs.next()) {
+							String dataFinal = rs.getDate("DT_COMPTC").toString();
+							// verifica se já existe indicadores do fundo no último mês
+							sql = "select cnpj_fundo_id from indicadores_fundos where cnpj_fundo_id=" + idFundo + " and periodo_meses=1 and data_final='" + dataFinal + "'";
+							rs2 = st2.executeQuery(sql);
+							if (!rs2.next()) { // se não há nada de um mês, não deve haver os períodos mais longos também (terminando do último mês); então calcula tudo. Se há, não faz nada
+								LocalDate primeiraDataPeriodo, ultimaDataPeriodo;
+								ultimaDataPeriodo = rs.getDate("DT_COMPTC").toLocalDate();
+								//System.out.println("Indicadores de 1 mês terminando em " + ultimaDataPeriodo);
+								primeiraDataPeriodo = ultimaDataPeriodo;
+								Month mesAnterior = ultimaDataPeriodo.getMonth();
+								Month mesAtual;
+								Double rentabilidade, sumRentabilidade = 0.0, minRentabilidade = 1e9, maxRentabilidade = -1e9;
+								ArrayList<Double> rentabilidades = new ArrayList<>();
+								ArrayList<Double> quotas = new ArrayList<>();
+								Integer numValores = 0, numMeses = 0;
+								Double rentabilidadeMedia = 0.0;
+								Double desvioPadrao = 0.0;
+								Double maxDrawdown = 0.0;
+								do {
+									mesAtual = rs.getDate("DT_COMPTC").toLocalDate().getMonth();
+									if (mesAtual.equals(mesAnterior)) {
+										// acumula
+										primeiraDataPeriodo = rs.getDate("DT_COMPTC").toLocalDate();
+										numValores++;
+										quotas.add(0, rs.getDouble("VL_QUOTA")); // inclui em ordem cronológica para posterior cálculo do MaxDrawdown
+										rentabilidade = rs.getDouble("rentab_diaria");
+										rentabilidades.add(rentabilidade);
+										sumRentabilidade += rentabilidade;
+										if (rentabilidade < minRentabilidade) {
+											minRentabilidade = rentabilidade;
+										}
+										if (rentabilidade > maxRentabilidade) {
+											maxRentabilidade = rentabilidade;
+										}
 									} else {
-										desvioPadrao = 0.0;
-									}
-									Double maxQuota = -1e6, drawDown, maxDrawdown = 0.0;  // TODO: MaxQuota é muito negativa pois pode haver quotas negativas (check this out)
-									for (Double quota : quotas) {
-										if (quota > maxQuota) {
-											maxQuota = quota;
+										// calcula indicadores do mês que terminou (e de todos os outros meses que já passou, de forma acumulada)
+										mesAnterior = mesAtual;
+										numMeses++;
+										rentabilidadeMedia = sumRentabilidade / numValores;
+										Double sumDesvioPadrao = 0.0;
+										for (Double rent : rentabilidades) {
+											sumDesvioPadrao += Math.pow(rent - rentabilidadeMedia, 2);
+										}
+										if (numValores > 1) {//pois n-1 == 0
+											desvioPadrao = Math.sqrt(sumDesvioPadrao / (numValores - 1));
 										} else {
-											if (maxQuota == 0.0) {
-												drawDown = 0.0;
+											desvioPadrao = 0.0;
+										}
+										Double maxQuota = -1e9, drawDown;
+										maxDrawdown = 0.0;  // TODO: MaxQuota é muito negativa pois pode haver quotas negativas (check this out)
+										for (Double quota : quotas) {
+											if (quota > maxQuota) {
+												maxQuota = quota;
 											} else {
-												drawDown = quota / maxQuota - 1.0;
+												if (maxQuota == 0.0) {
+													drawDown = 0.0;
+												} else {
+													drawDown = quota / maxQuota - 1.0;
+												}
+												if (drawDown < maxDrawdown) {
+													maxDrawdown = drawDown;
+												}
 											}
-											if (drawDown < maxDrawdown) {
-												maxDrawdown = drawDown;
+										}
+										if (numMeses == 1 || numMeses == 2 || numMeses == 3 || numMeses == 6 || numMeses % 12 == 0) {
+											// salva no BD
+											sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_bench, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
+											try {
+												st2.execute(sql);
+												countRecords++;
+												if (numMeses % 12 == 0) {
+													connection.commit();
+													tempoProcessamentoParte = (System.currentTimeMillis() - fimProcessamento);
+													tempoProcessamentoTotal = (System.currentTimeMillis() - inicioProcessamento);
+													//System.out.println("info:      [" + this.csvThreadID + "] " + numMeses + " meses processados até o momento (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
+													fimProcessamento = System.currentTimeMillis();
+												}
+											} catch (SQLException ex) {
+												Logger.getLogger(CVMDatabaseThread.class.getName()).log(Level.SEVERE, null, ex);
+												System.out.println("ERRO: " + ex.getMessage());
+												countRecordsRepetidos++;
 											}
 										}
 									}
-									// salva no BD
-									sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, tipo_benchmark_id, meses_acima_bench, sharpe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + dataFinal + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ",null,null,null,null)";
+								} while (rs.next()); // && numMeses <= 60);
+								// foi até o começo do funcionamento do fundo, mas os primeiros meses que não formam um ano completo a partir do mês atual, não foram gravados no BD
+								// TODO: // deve gravar os primeiros meses para ter um registro do período máximo do fundo (desde que haja pelo menos 1 mes de dados)
+								// salva no BD
+								if (numMeses > 0) {
+									sql = "INSERT INTO indicadores_fundos (cnpj_fundo_id, periodo_meses, data_inicial, data_final, rentabilidade, desvio_padrao, num_valores, rentab_min, rentab_max, max_drawdown, meses_acima_bench, sharpe, sharpe_geral_bench, sharpe_geral_classe, beta) VALUES (" + idFundo + "," + numMeses + ",'" + primeiraDataPeriodo + "', '" + ultimaDataPeriodo + "'," + rentabilidadeMedia + "," + desvioPadrao + "," + numValores + "," + minRentabilidade + "," + maxRentabilidade + "," + maxDrawdown + ", null, null, null, null, null)";
 									try {
 										st2.execute(sql);
 										countRecords++;
@@ -1239,18 +1282,22 @@ public class CVMDatabaseThread extends NotifyingThread {
 											connection.commit();
 											tempoProcessamentoParte = (System.currentTimeMillis() - fimProcessamento);
 											tempoProcessamentoTotal = (System.currentTimeMillis() - inicioProcessamento);
-											System.out.println("info:      [" + this.csvThreadID + "] " + numMeses + " meses processados até o momento (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
+											//System.out.println("info:      [" + this.csvThreadID + "] " + numMeses + " meses processados até o momento (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
 											fimProcessamento = System.currentTimeMillis();
 										}
 									} catch (SQLException ex) {
 										//Logger.getLogger(CVMDatabaseThread.class.getName()).log(Level.SEVERE, null, ex);
 										countRecordsRepetidos++;
 									}
+									connection.commit();
 								}
-							} while (rs.next() && numMeses <= 48);
-							connection.commit();
+								System.out.println("info:      [" + this.csvThreadID + "] " + numMeses + " meses processados (totalizando " + (int) (tempoProcessamentoTotal) + " ms)");//, sendo " + countRecordsComErro + " com erro e " + countRecordsRepetidos + " preexistentes");
+
+							}
 						}
+						mesesNoPassadoParaUltimaData++;
 					}
+
 				}
 			}
 		} catch (SQLException ex) {
